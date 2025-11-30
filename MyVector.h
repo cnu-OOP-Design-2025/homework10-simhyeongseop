@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <stdexcept>
 
+//과제 확인
 template<typename T>
 class MyVector {
     T* data;

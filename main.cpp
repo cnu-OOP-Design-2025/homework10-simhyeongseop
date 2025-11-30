@@ -1,7 +1,6 @@
 #include <iostream>
 #include "MyVector.h"
 
-
 void test1() {
     MyVector<int> v;
     v.push_back(0);
