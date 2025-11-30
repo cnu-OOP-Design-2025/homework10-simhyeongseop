@@ -2,6 +2,7 @@
 
 #include <initializer_list>
 #include <cstddef>
+#include <stdexcept>
 
 
 template<typename T>
@@ -9,6 +10,8 @@ class MyVector {
     T* data;            // 동적 배열을 가리키는 포인터
     size_t cap;         // 현재 할당된 배열 크기
     size_t length;      // 실제 저장된 요소 개수    
+
+    void ensure_capacity(size_t min_cap);
 public:
 
     MyVector(std::initializer_list<T> init) {
@@ -23,6 +26,10 @@ public:
 
     MyVector(): data(nullptr), length(0), cap(0) {}
     ~MyVector() { delete[] data; }
+    MyVector(const MyVector& other);
+    MyVector(MyVector&& other) noexcept;
+    MyVector& operator=(const MyVector& other);
+    MyVector& operator=(MyVector&& other) noexcept;
 
     void push_back(const T& val);   // Vector 마지막에 항목을 추가하는 함수 구현, 필요시 벡터 크기 증가
     void pop_back();                // Vector의 마지막 항목을 제거하는 함수 구현
@@ -47,6 +54,7 @@ public:
         T* ptr;         // 항목에 대한 포인터
     public:
         Iterator(T* p = nullptr): ptr(p) {}
+        T* get() const { return ptr; }
 
         T& operator*(); // 역참조 연산자 구현 
 
@@ -65,6 +73,8 @@ public:
     Iterator begin() ;
     // 마지막 항목에 대한 iterator 리턴 함수 구현 
     Iterator end() ;
+    ReverseIterator rbegin() ;
+    ReverseIterator rend() ;
 
 
     // insert: 지정 위치에 요소 삽입 함수 구현
@@ -90,3 +100,19 @@ public:
     bool empty() const ;    // 현재 vector가 empty인지 확인하는 함수 구현
 
 };
+    class ReverseIterator {
+        T* base;
+        std::ptrdiff_t index;
+    public:
+        ReverseIterator(T* base_ptr = nullptr, std::ptrdiff_t idx = -1)
+            : base(base_ptr), index(idx) {}
+
+        T& operator*();
+        ReverseIterator& operator++();
+        ReverseIterator& operator--();
+        ReverseIterator operator+(int n) const;
+        ReverseIterator operator-(int n) const;
+        bool operator==(const ReverseIterator& other) const;
+        bool operator!=(const ReverseIterator& other) const;
+        int operator-(const ReverseIterator& other) const;
+    };
