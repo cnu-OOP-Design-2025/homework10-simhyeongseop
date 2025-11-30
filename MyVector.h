@@ -155,3 +155,151 @@ public:
 
     bool empty() const { return length == 0; }
 };
+
+template<typename T>
+void MyVector<T>::ensure_capacity(size_t minCapacity) {
+    if (cap >= minCapacity) {
+        return;
+    }
+    size_t newCap = cap ? cap : 1;
+    while (newCap < minCapacity) {
+        newCap *= 2;
+    }
+    T* newData = new T[newCap];
+    for (size_t i = 0; i < length; ++i) {
+        newData[i] = data[i];
+    }
+    delete[] data;
+    data = newData;
+    cap = newCap;
+}
+
+template<typename T>
+MyVector<T>::MyVector(const MyVector& other)
+    : data(nullptr), cap(other.cap), length(other.length) {
+    if (cap > 0) {
+        data = new T[cap];
+        for (size_t i = 0; i < length; ++i) {
+            data[i] = other.data[i];
+        }
+    }
+}
+
+template<typename T>
+MyVector<T>& MyVector<T>::operator=(const MyVector& other) {
+    if (this == &other) {
+        return *this;
+    }
+
+    T* newData = other.cap ? new T[other.cap] : nullptr;
+    for (size_t i = 0; i < other.length; ++i) {
+        newData[i] = other.data[i];
+    }
+
+    delete[] data;
+    data = newData;
+    cap = other.cap;
+    length = other.length;
+    return *this;
+}
+
+template<typename T>
+MyVector<T>::MyVector(MyVector&& other) noexcept
+    : data(other.data), cap(other.cap), length(other.length) {
+    other.data = nullptr;
+    other.cap = 0;
+    other.length = 0;
+}
+
+template<typename T>
+MyVector<T>& MyVector<T>::operator=(MyVector&& other) noexcept {
+    if (this == &other) {
+        return *this;
+    }
+
+    delete[] data;
+    data = other.data;
+    cap = other.cap;
+    length = other.length;
+
+    other.data = nullptr;
+    other.cap = 0;
+    other.length = 0;
+    return *this;
+}
+
+template<typename T>
+bool MyVector<T>::operator==(const MyVector& other) const {
+    if (length != other.length) {
+        return false;
+    }
+    for (size_t i = 0; i < length; ++i) {
+        if (data[i] != other.data[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
+bool MyVector<T>::operator!=(const MyVector& other) const {
+    return !(*this == other);
+}
+
+template<typename T>
+bool MyVector<T>::operator<(const MyVector& other) const {
+    size_t minLen = length < other.length ? length : other.length;
+    for (size_t i = 0; i < minLen; ++i) {
+        if (data[i] < other.data[i]) {
+            return true;
+        }
+        if (data[i] > other.data[i]) {
+            return false;
+        }
+    }
+    return length < other.length;
+}
+
+template<typename T>
+bool MyVector<T>::operator>(const MyVector& other) const {
+    return other < *this;
+}
+
+template<typename T>
+bool MyVector<T>::operator<=(const MyVector& other) const {
+    return !(*this > other);
+}
+
+template<typename T>
+bool MyVector<T>::operator>=(const MyVector& other) const {
+    return !(*this < other);
+}
+
+template<typename T>
+T& MyVector<T>::Iterator::operator*() {
+    if (!ptr) {
+        throw std::out_of_range("invalid iterator dereference");
+    }
+    return *ptr;
+}
+
+template<typename T>
+bool MyVector<T>::Iterator::operator==(const Iterator& other) const {
+    return ptr == other.ptr;
+}
+
+template<typename T>
+bool MyVector<T>::Iterator::operator!=(const Iterator& other) const {
+    return ptr != other.ptr;
+}
+
+template<typename T>
+int MyVector<T>::Iterator::operator-(const Iterator& other) const {
+    if (!ptr && !other.ptr) {
+        return 0;
+    }
+    if (!ptr || !other.ptr) {
+        throw std::out_of_range("iterators are incompatible");
+    }
+    return static_cast<int>(ptr - other.ptr);
+}
